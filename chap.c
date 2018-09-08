@@ -40,22 +40,36 @@ void chap_map_destroy(chap_map_t *map){
     map = NULL;
 }
 
+chap_entry_t* chap_insert(chap_map_t *map, char *key, char *val) {
+    unsigned hashval;
+    chap_entry_t *entry = (chap_entry_t*) malloc(sizeof(chap_entry_t));
+    if (entry == NULL || (entry->key = strdup(key)) == NULL)
+          return NULL;
+    if ((entry->val = strdup(val)) == NULL) {
+       return NULL;
+    }
+    hashval = chap_hash(key, map->cap);
+    entry->next = map->table[hashval];
+    map->table[hashval] = entry;
+    return entry;
+}
+
 int chap_put(chap_map_t *map, char *key, char *val) {
     chap_entry_t *entry;
-    unsigned hashval;
+    // Attempt to find the key in the table. If it isn't there, we need to add a new entry. If it is, we will
+    // update the existing entry's value
     if ((entry = chap_find(map, key)) == NULL) {
-        // Entry was not found. Hash the key
-        entry = (chap_entry_t*) malloc(sizeof(chap_entry_t));
-        if (entry == NULL || (entry->key = strdup(key)) == NULL)
-          return -1;
-        hashval = chap_hash(key, map->cap);
-        entry->next = map->table[hashval];
-        map->table[hashval] = entry;
+        // Entry was not found. Insert a new pair
+        entry = chap_insert(map, key, val);
+        if(entry == NULL){
+            return -1;
+        }
     } else {
+        // Entry was found. Update its value
         free(entry->val);
-    }
-    if ((entry->val = strdup(val)) == NULL) {
-       return -1;
+        if ((entry->val = strdup(val)) == NULL) {
+            return -1;
+        }
     }
     return 0;
 }
@@ -76,6 +90,14 @@ chap_entry_t* chap_find(chap_map_t *map, char *key){
         }
     }
     return NULL;
+}
+
+char* chap_get_default(chap_map_t *map, char *key, char *def){
+    chap_entry_t *entry = chap_find(map,key);
+    if(entry == NULL){
+        entry = chap_insert(map, key, def);
+    }
+    return entry->val;
 }
 
 char* chap_strdup(char *s) {
