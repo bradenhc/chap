@@ -52,3 +52,8 @@ chap_entry_t* chap_find(chap_map_t *map, char *key);
 /// will insert the default value into the map and return it.
 char* chap_get_default(chap_map_t *map, char *key, char *def);
 
+/// chap_get_int attempts to retrieve the value with the associated key from the map and convert it into an integer
+/// value. The resulting integer value will be stored in the 'val' pointer. If the function finds 
+/// the entry and successfully converts to an int, it will return 0. If an entry with the key was not found, or if 
+/// the conversion failed,the function will  return -1 and the value of 'val' will remain unchanged.
+int chap_get_int(chap_map_t *map, char *key, int *val);

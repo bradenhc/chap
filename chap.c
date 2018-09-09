@@ -2,12 +2,24 @@
 // Copyright (c) 2018 Braden Hitchcock
 #include "chap.h"
 #include <string.h>
+#include <inttypes.h>
+#include <errno.h>
+
+#include <stdio.h>
 
 unsigned chap_hash(char *s, int cap) {
     unsigned hashval;
     for (hashval = 0; *s != '\0'; s++)
       hashval = *s + 31 * hashval;
     return hashval % cap;
+}
+
+char* chap_strdup(char *s) {
+    char *p;
+    p = (char *) malloc(strlen(s)+1);
+    if (p != NULL)
+       strcpy(p, s);
+    return p;
 }
 
 chap_map_t* chap_map_new(){
@@ -74,20 +86,20 @@ int chap_put(chap_map_t *map, char *key, char *val) {
     return 0;
 }
 
-char* chap_get(chap_map_t *map, char *key){
-    chap_entry_t *entry = chap_find(map, key);
-    if(entry != NULL){
-        return entry->val;
-    }
-    return NULL;
-}
-
 chap_entry_t* chap_find(chap_map_t *map, char *key){
     chap_entry_t *entry;
     for (entry = map->table[chap_hash(key, map->cap)]; entry != NULL; entry = entry->next){
         if (strcmp(key, entry->key) == 0){
             return entry;
         }
+    }
+    return NULL;
+}
+
+char* chap_get(chap_map_t *map, char *key){
+    chap_entry_t *entry = chap_find(map, key);
+    if(entry != NULL){
+        return entry->val;
     }
     return NULL;
 }
@@ -100,10 +112,15 @@ char* chap_get_default(chap_map_t *map, char *key, char *def){
     return entry->val;
 }
 
-char* chap_strdup(char *s) {
-    char *p;
-    p = (char *) malloc(strlen(s)+1);
-    if (p != NULL)
-       strcpy(p, s);
-    return p;
+int chap_get_int(chap_map_t *map, char *key, int *val) {
+    char* s = chap_get(map, key);
+    if(s == NULL){
+        return -1;
+    }
+    intmax_t num = strtoimax(s, NULL, 10);
+    if(num == INTMAX_MAX && errno == ERANGE){
+        return -1;
+    }
+    *val = (int)num;
+    return 0;
 }
