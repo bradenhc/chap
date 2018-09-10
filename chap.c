@@ -4,6 +4,7 @@
 #include <string.h>
 #include <inttypes.h>
 #include <errno.h>
+#include <stdarg.h>
 
 #include <stdio.h>
 
@@ -16,35 +17,47 @@ unsigned chap_hash(char *s, int cap) {
 
 char* chap_strdup(char *s) {
     char *p;
-    p = (char *) malloc(strlen(s)+1);
+    p = (char *) calloc(strlen(s)+1, sizeof(char));
     if (p != NULL)
        strcpy(p, s);
     return p;
 }
 
+void chap_trace(const char* format, ...){
+    va_list args;
+    va_start(args, format);
+    vprintf(format, args);
+    va_end(args);
+    fflush(stdout);
+}
+
 chap_map_t* chap_map_new(){
-    chap_map_t* map = (chap_map_t*) malloc(sizeof(chap_map_t));
-    map->table = (chap_entry_t**) malloc(CHAP_INITIAL_HASHSIZE * sizeof(chap_entry_t*));
+    chap_map_t* map = (chap_map_t*) calloc(1, sizeof(chap_map_t));
+    map->table = (chap_entry_t**) calloc(CHAP_INITIAL_HASHSIZE, sizeof(chap_entry_t*));
     map->cap = CHAP_INITIAL_HASHSIZE;
     return map;
 }
 
-void chap_map_destroy(chap_map_t *map){
-    // Free all the entries in the map
+void chap_clear(chap_map_t *map){
     int i;
     for(i = 0; i < map->cap; i++){
-        chap_entry_t *entry = map->table[i];
-        chap_entry_t *last;
-        if(entry != NULL){
-            do{
-                last = entry;
-                entry = entry->next;
-                free(last->key);
-                free(last->val);
-                free(last);
-            } while(entry != NULL);
+        chap_entry_t *entry = map->table[i], *tmp;
+        while(entry != NULL){
+            tmp = entry;
+            entry = entry->next;
+            free(tmp->key);
+            tmp->key = NULL;
+            free(tmp->val);
+            tmp->val = NULL;
+            free(tmp);
         }
+        map->table[i] = NULL;
     }
+}
+
+void chap_map_destroy(chap_map_t *map){
+    // Free all the entries in the map
+    chap_clear(map);
     // Free the table pointer
     free(map->table);
     // Free the map pointer
@@ -54,7 +67,7 @@ void chap_map_destroy(chap_map_t *map){
 
 chap_entry_t* chap_insert(chap_map_t *map, char *key, char *val) {
     unsigned hashval;
-    chap_entry_t *entry = (chap_entry_t*) malloc(sizeof(chap_entry_t));
+    chap_entry_t *entry = (chap_entry_t*) calloc(1, sizeof(chap_entry_t));
     if (entry == NULL || (entry->key = strdup(key)) == NULL)
           return NULL;
     if ((entry->val = strdup(val)) == NULL) {

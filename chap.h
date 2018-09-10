@@ -25,8 +25,16 @@ unsigned chap_hash(char* s, int size);
 /// chap_strdup creates a duplicate of the provided string
 char* chap_strdup(char *s);
 
+/// chap_trace will print to stdout and immediately flush the buffer to ensure output even in the presence of faulty
+/// code. Good for debugging
+void chap_trace(const char* format, ... );
+
 /// chap_map_new creates a new map and returns the allocated map to the caller.
 chap_map_t* chap_map_new();
+
+/// chap_clear will remove all entries in the map and free all key/value pairs, resetting the size of the hashmap
+/// to the default size of map created by chap_map_destroy
+void chap_clear(chap_map_t *map);
 
 /// chap_map_destroy destroys an existing map
 void chap_map_destroy(chap_map_t* map);
@@ -40,13 +48,13 @@ chap_entry_t* chap_insert(chap_map_t *map, char *key, char *val);
 /// the value will be updated.
 int chap_put(chap_map_t *map, char *key, char *val);
 
-/// chap_get retrieves a value from and entry in the map with the associated key. If the value doesn't exist, this 
-/// function will return NULL.
-char* chap_get(chap_map_t *map, char *key);
-
 /// chap_find locates and retrieves an entry in the map if it exists. If it doesn't exist, this function will return
 /// NULL.
 chap_entry_t* chap_find(chap_map_t *map, char *key);
+
+/// chap_get retrieves a value from and entry in the map with the associated key. If the value doesn't exist, this 
+/// function will return NULL.
+char* chap_get(chap_map_t *map, char *key);
 
 /// chap_get_default attempts to retrieve the value in the map with the associated key. If no entry is found, it
 /// will insert the default value into the map and return it.
