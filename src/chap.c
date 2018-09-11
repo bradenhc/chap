@@ -22,14 +22,6 @@ char* chap_strdup(char *s) {
     return p;
 }
 
-void chap_trace(const char* format, ...){
-    va_list args;
-    va_start(args, format);
-    vprintf(format, args);
-    va_end(args);
-    fflush(stdout);
-}
-
 chap_map_t* chap_map_new(){
     chap_map_t* map = (chap_map_t*) calloc(1, sizeof(chap_map_t));
     map->table = (chap_entry_t**) calloc(CHAP_INITIAL_HASHSIZE, sizeof(chap_entry_t*));

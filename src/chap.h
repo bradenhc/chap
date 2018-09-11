@@ -25,10 +25,6 @@ unsigned chap_hash(char* s, int size);
 /// chap_strdup creates a duplicate of the provided string
 char* chap_strdup(char *s);
 
-/// chap_trace will print to stdout and immediately flush the buffer to ensure output even in the presence of faulty
-/// code. Good for debugging
-void chap_trace(const char* format, ... );
-
 /// chap_map_new creates a new map and returns the allocated map to the caller.
 chap_map_t* chap_map_new();
 
