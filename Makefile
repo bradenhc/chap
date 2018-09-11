@@ -21,3 +21,7 @@ include $(SRCS:.c=.d)
 .PHONY: clean
 clean:
 	-${RM} ${TARGET_LIB} ${OBJS} $(SRCS:.c=.d)
+
+.PHONY: test
+test:
+	gcc -I./src/ -L. test/main.c -o test/test -lchap

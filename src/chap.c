@@ -1,12 +1,11 @@
 // CHAP - Hashmap implementation in C
 // Copyright (c) 2018 Braden Hitchcock
 #include "chap.h"
+
 #include <string.h>
 #include <inttypes.h>
 #include <errno.h>
 #include <stdarg.h>
-
-#include <stdio.h>
 
 unsigned chap_hash(char *s, int cap) {
     unsigned hashval;
